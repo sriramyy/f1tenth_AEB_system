@@ -66,13 +66,16 @@ class AEBNode(Node):
 
     # --- EMERGENCY BRAKE --- this is called when we actually need to activate the emergency brake system
     def emergency_brake(self):
-        # create the stop message
         stop_msg = AckermannDriveStamped()
+        stop_msg.header.stamp = self.get_clock().now().to_msg() # timestamp
         stop_msg.drive.speed = 0.0
+        
+        # Adding a high jerk/deceleration can help some VESC configurations stop faster
+        stop_msg.drive.acceleration = -10.0 
 
-        # publish the stop message
         self.drive_pub.publish(stop_msg)
-        self.get_logger().warn("[AEB TRIGGERED] BRAKING!")
+        self.get_logger().warn("[AEB TRIGGERED] BRAKING!", throttle_duration_sec=1.0)
+    
 
 def main(args=None):
     rclpy.init(args=args)
