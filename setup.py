@@ -12,14 +12,14 @@ setup(
 	],
 	install_requires=['setuptools'],
 	zip_safe=True,
-	maintainer='srira',
-	maintainer_email='srira@todo.todo',
+	maintainer='Sriram Yerramsetty',
+	maintainer_email='sriram.yerramsetty1@gmail.com',
 	description='Automatic Emergency Braking (AEB) node for F1TENTH using LiDAR and odometry data.',
-	license='TODO: License declaration',
+	license='MIT',
 	tests_require=['pytest'],
 	entry_points={
 		'console_scripts': [
-			'aeb_node = aeb.aeb:main',
+			'aeb_package = aeb.aeb:main',
 		],
 	},
 )
