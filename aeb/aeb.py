@@ -19,7 +19,7 @@ class AEBNode(Node):
         # note that if the topic names are different then we change them here
         # subscribers: Listen to Lidar and Odom
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
-        self.odom_sub = self.create_subscription(Odometry, '/ego_racecar/odom', self.odom_callback, 10)
+        self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
 
         # publisher: Send stop command to the car
         self.drive_pub = self.create_publisher(AckermannDriveStamped, '/drive', 10)
@@ -55,8 +55,13 @@ class AEBNode(Node):
             ttc = front_ranges / np.maximum(range_rate, 1e-6)
 
             # check the minimum TTC in our restricted view
-            if np.min(ttc) < self.ttc_threshold:
-                # if we need to, activate emergency brake
+            # also lets print the ttc for debugging purposes
+            min_ttc = np.min(ttc)
+
+            # Use ROS2 logging with a 0.5-second throttle so it doesn't spam the screen
+            self.get_logger().info(f"Current TTC: {min_ttc:.2f} seconds", throttle_duration_sec=0.5)
+
+            if min_ttc < self.ttc_threshold:
                 self.emergency_brake()
 
     # --- EMERGENCY BRAKE --- this is called when we actually need to activate the emergency brake system
