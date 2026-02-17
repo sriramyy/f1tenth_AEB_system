@@ -13,8 +13,7 @@ class AEBNode(Node):
         
         # init variables
         self.speed = 0.0
-        self.ttc_threshold = 1.5 # Threshold in seconds
-        self.brake_engaged = False
+        self.ttc_threshold = 1.3 # Threshold in seconds
 
         # --- SUBSCRIBERS AND PUBLISHERS ---
         # note that if the topic names are different then we change them here
@@ -63,10 +62,6 @@ class AEBNode(Node):
             self.get_logger().info(f"Current TTC: {min_ttc:.2f} seconds", throttle_duration_sec=0.5)
 
             if min_ttc < self.ttc_threshold:
-                self.brake_engaged = True
-            
-            # If the brake was triggered, keep sending the stop command
-            if self.brake_engaged:
                 self.emergency_brake()
 
 
@@ -76,6 +71,7 @@ class AEBNode(Node):
         stop_msg.header.stamp = self.get_clock().now().to_msg() # timestamp
         stop_msg.drive.speed = 0.0
         
+        # Adding a high jerk/deceleration can help some VESC configurations stop faster
         stop_msg.drive.acceleration = -10.0 
 
         self.drive_pub.publish(stop_msg)
