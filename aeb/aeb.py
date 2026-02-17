@@ -13,7 +13,7 @@ class AEBNode(Node):
         
         # init variables
         self.speed = 0.0
-        self.ttc_threshold = 0.4 # Threshold in seconds
+        self.ttc_threshold = 1.2 # Threshold in seconds
 
         # --- SUBSCRIBERS AND PUBLISHERS ---
         # note that if the topic names are different then we change them here
