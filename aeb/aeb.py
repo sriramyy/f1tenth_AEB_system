@@ -32,37 +32,37 @@ class AEBNode(Node):
     
     # --- SCAN CALLBACK --- this is called whenever we get data from the LIDAR, so we want to check the forward LIDAR beam for the distance
     def scan_callback(self, msg):
-            # convert to numpy array for efficiency
-            ranges = np.array(msg.ranges)
+        # convert to numpy array for efficiency
+        ranges = np.array(msg.ranges)
             
-            # define our center 20 degrees
-            # with 0.25 deg resolution, 20 degrees = 80 beams total (40 each side)
-            center_idx = len(ranges) // 2
-            window = 40 
+        # define our center 20 degrees
+        # with 0.25 deg resolution, 20 degrees = 80 beams total (40 each side)
+        center_idx = len(ranges) // 2
+        window = 40 
             
-            # slice the arrays to only look at the front
-            front_ranges = ranges[center_idx - window : center_idx + window]
+        # slice the arrays to only look at the front
+        front_ranges = ranges[center_idx - window : center_idx + window]
             
-            # calc angles only for this specific slice
-            # calculate the specific angles to maintain TTC accuracy
-            angle_min_front = msg.angle_min + (center_idx - window) * msg.angle_increment
-            angle_max_front = msg.angle_min + (center_idx + window) * msg.angle_increment
-            front_angles = np.linspace(angle_min_front, angle_max_front, len(front_ranges))
+        # calc angles only for this specific slice
+        # calculate the specific angles to maintain TTC accuracy
+        angle_min_front = msg.angle_min + (center_idx - window) * msg.angle_increment
+        angle_max_front = msg.angle_min + (center_idx + window) * msg.angle_increment
+        front_angles = np.linspace(angle_min_front, angle_max_front, len(front_ranges))
 
-            # calc TTC only for the front slice
-            # notice we use the self.speed variable here which is from our odom callback
-            range_rate = self.speed * np.cos(front_angles)
-            ttc = front_ranges / np.maximum(range_rate, 1e-6)
+        # calc TTC only for the front slice
+        # notice we use the self.speed variable here which is from our odom callback
+        range_rate = self.speed * np.cos(front_angles)
+        ttc = front_ranges / np.maximum(range_rate, 1e-6)
 
-            # check the minimum TTC in our restricted view
-            # also lets print the ttc for debugging purposes
-            min_ttc = np.min(ttc)
+        # check the minimum TTC in our restricted view
+        # also lets print the ttc for debugging purposes
+        min_ttc = np.min(ttc)
 
-            # Use ROS2 logging with a 0.5-second throttle so it doesn't spam the screen
-            self.get_logger().info(f"Current TTC: {min_ttc:.2f} seconds", throttle_duration_sec=0.5)
+        # Use ROS2 logging with a 0.5-second throttle so it doesn't spam the screen
+        self.get_logger().info(f"Current TTC: {min_ttc:.2f} seconds", throttle_duration_sec=0.5)
 
-            if min_ttc < self.ttc_threshold:
-                self.emergency_brake()
+        if min_ttc < self.ttc_threshold:
+            self.emergency_brake()
 
 
     # --- EMERGENCY BRAKE --- this is called when we actually need to activate the emergency brake system
